@@ -119,7 +119,7 @@ def train_with_tsdae(
     model_name: str = "models/all-MiniLM-L6-v2",
     output_dir: str = "models/finetuned-minilm",
     epochs: int = 1,
-    batch_size: int = 8,
+    batch_size: int = 4,
 ):
     """
     Train using TSDAE (unsupervised denoising auto-encoder).
@@ -177,7 +177,7 @@ def train_with_contrastive(
     model_name: str = "models/all-MiniLM-L6-v2",
     output_dir: str = "models/finetuned-minilm-contrastive",
     epochs: int = 1,
-    batch_size: int = 64,
+    batch_size: int = 16,
 ):
     """
     Train using Multiple Negatives Ranking Loss (contrastive learning).
@@ -250,20 +250,26 @@ def main():
     parser.add_argument(
         "--batch-size",
         type=int,
-        default=8,
-        help="Batch size for training (default: 8 for TSDAE)"
+        default=4,
+        help="Batch size for training (default: 4, reduce if OOM)"
     )
     parser.add_argument(
         "--model-name",
         default="models/all-MiniLM-L6-v2",
         help="Base model to fine-tune"
     )
+    parser.add_argument(
+        "--max-files",
+        type=int,
+        default=500,
+        help="Maximum number of markdown files to train on (default: 500)"
+    )
     
     args = parser.parse_args()
     
     # Load documents
     print(f"Loading markdown files from {args.data_dir}...")
-    documents = load_local_markdown_files(args.data_dir)
+    documents = load_local_markdown_files(args.data_dir, max_files=args.max_files)
     
     # Extract sentences
     sentences = extract_sentences(documents)

@@ -27,6 +27,11 @@ def download_fineweb_edu(
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
     
+    existing_files = list(output_path.glob("*.md"))
+    if len(existing_files) >= target_files:
+        print(f"Already have {len(existing_files)} files in {output_path}, skipping download.")
+        return len(existing_files)
+    
     print("Loading 'HuggingFaceFW/fineweb-edu' (sample-10BT) dataset...")
     print("This contains high-quality educational web content.")
     print("Dataset is ~20GB, using streaming mode...")
@@ -102,6 +107,11 @@ def download_wikipedia(
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
     
+    existing_files = list(output_path.glob("*.md"))
+    if len(existing_files) >= target_files:
+        print(f"Already have {len(existing_files)} files in {output_path}, skipping download.")
+        return len(existing_files)
+    
     print("Loading 'wikipedia' dataset (20220301.en)...")
     
     dataset = load_dataset(
@@ -170,6 +180,11 @@ def download_arxiv_abstracts(
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
     
+    existing_files = list(output_path.glob("*.md"))
+    if len(existing_files) >= target_files:
+        print(f"Already have {len(existing_files)} files in {output_path}, skipping download.")
+        return len(existing_files)
+    
     print("Loading 'ccdv/arxiv-summarization' dataset...")
     
     dataset = load_dataset(
@@ -224,9 +239,13 @@ def download_arxiv_abstracts(
     return file_count
 
 
-def load_local_markdown_files(data_dir: str = "data/markdown") -> list[dict]:
+def load_local_markdown_files(data_dir: str = "data/markdown", max_files: int | None = None) -> list[dict]:
     """
     Load downloaded markdown files for training.
+    
+    Args:
+        data_dir: Directory containing markdown files
+        max_files: Maximum number of files to load (None for all)
     
     Returns:
         List of dicts with 'text' and 'source' keys
@@ -240,8 +259,11 @@ def load_local_markdown_files(data_dir: str = "data/markdown") -> list[dict]:
         )
     
     documents = []
+    files = list(data_path.glob("*.md"))
+    if max_files is not None:
+        files = files[:max_files]
     
-    for md_file in tqdm(list(data_path.glob("*.md")), desc="Loading files"):
+    for md_file in tqdm(files, desc="Loading files"):
         with open(md_file, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
             

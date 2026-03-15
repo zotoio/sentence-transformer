@@ -259,6 +259,10 @@ def create_ui():
         Test and compare sentence transformer models for semantic similarity and search.
         """)
         
+        with gr.Row():
+            refresh_btn = gr.Button("🔄 Refresh Models", scale=0)
+            models_status = gr.Markdown(f"**Models:** {', '.join([f'`{m}`' for m in available_models])}")
+        
         with gr.Tab("🔍 Similarity"):
             gr.Markdown("### Compute similarity between two texts")
             with gr.Row():
@@ -417,12 +421,18 @@ def create_ui():
                 outputs=[cmp_results]
             )
         
-        gr.Markdown("""
-        ---
-        **Available Models**: """ + ", ".join([f"`{m}`" for m in available_models]) + """
+        def refresh_models():
+            """Refresh available models list."""
+            models = get_available_models()
+            status = f"**Models:** {', '.join([f'`{m}`' for m in models])}"
+            dropdown_update = gr.update(choices=models)
+            return [status] + [dropdown_update] * 6
         
-        *Refresh the page to detect newly trained models.*
-        """)
+        refresh_btn.click(
+            refresh_models,
+            inputs=[],
+            outputs=[models_status, sim_model, search_model, batch_model, emb_model, cmp_model1, cmp_model2]
+        )
     
     return demo
 
